@@ -1,0 +1,21 @@
+package main
+
+import "fmt"
+
+func main() {
+	foo().try
+}
+
+func foo() error {
+    a().try
+    return nil
+}
+
+func bar() (int, error) {
+    a().try
+    return 0, nil
+}
+
+var a = func() (int, error) {
+    return 0, nil
+}
