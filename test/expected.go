@@ -1,16 +1,14 @@
 package main
 
-import "fmt"
-
 func main() {
-	_err_ = foo()
+	_err_ := foo()
 	if _err_ != nil {
 		return
 	}
 }
 
 func foo() error {
-	_err_ = a()
+	_err_ := b(0)
 	if _err_ != nil {
 		return _err_
 	}
@@ -18,12 +16,16 @@ func foo() error {
 }
 
 func bar() (int, error) {
-	_err_ = a()
+	_err_ := b(0)
 	if _err_ != nil {
 		var v0 int
 		return v0, _err_
 	}
 	return 0, nil
+}
+
+func b(int) error {
+	return nil
 }
 
 var a = func() (int, error) {

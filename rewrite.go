@@ -66,6 +66,7 @@ func handleFuncBody(b *ast.BlockStmt) {
 
 func checkExprStmt(e *ast.ExprStmt) bool {
 	if s, ok := e.X.(*ast.SelectorExpr); ok {
+		// TODO support try2, try3 to specify the error position
 		if s.Sel.Name == marker {
 			astutil.Apply(s.X, finder, nil)
 			return true
@@ -81,10 +82,12 @@ func finder(c *astutil.Cursor) bool {
 		handleFuncLit(v)
 	case *ast.ExprStmt:
 		if checkExprStmt(v) {
+			rhs := v.X.(*ast.SelectorExpr).X
+
 			assign := &ast.AssignStmt{}
-			assign.Tok = token.ASSIGN
+			assign.Tok = token.DEFINE
 			assign.Lhs = []ast.Expr{&ast.Ident{Name: errName}}
-			assign.Rhs = []ast.Expr{v.X.(*ast.SelectorExpr).X}
+			assign.Rhs = []ast.Expr{rhs}
 			c.Replace(assign)
 
 			ifErr := &ast.IfStmt{}

@@ -1,19 +1,21 @@
 package main
 
-import "fmt"
-
 func main() {
-	foo().try
+    foo().try
 }
 
 func foo() error {
-    a().try
+    b(0).try
     return nil
 }
 
 func bar() (int, error) {
-    a().try
+    b(0).try
     return 0, nil
+}
+
+func b(int) error {
+    return nil
 }
 
 var a = func() (int, error) {
