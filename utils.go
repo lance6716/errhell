@@ -1,13 +1,13 @@
 package errhell
 
 import (
+	"fmt"
 	"go/ast"
 	"strconv"
 	"strings"
 )
 
 var marker = "try"
-var errName = "_err_"
 
 func checkErr(err error) {
 	if err != nil {
@@ -16,6 +16,15 @@ func checkErr(err error) {
 }
 
 var returnStack []*ast.FieldList
+var errVarNameStack []int
+
+func genErrVarName() string {
+	curr := errVarNameStack[len(errVarNameStack)-1]
+	ret := fmt.Sprintf("_err%d", curr)
+	curr++
+	errVarNameStack[len(errVarNameStack)-1] = curr
+	return ret
+}
 
 // matchMarker will extract the number N which in the pattern $(marker)N.
 // empty N returns 1.

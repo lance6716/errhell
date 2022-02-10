@@ -12,8 +12,8 @@ func foo() error {
     return nil
 }
 
-func bar() (int, error) {
-    b(0).try
+func bar() (i int, err error) {
+    err = b(0).try
     return 0, nil
 }
 
@@ -23,5 +23,12 @@ func b(int) error {
 
 var a = func() (float32, error) {
     fmt.Printf("%p", b).try2
+
+    func() (string, string, error){
+    	var myErr error
+    	myErr = foo().try
+    	return "", "", nil
+    }().try3
+
     return 0, nil
 }

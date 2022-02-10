@@ -3,8 +3,8 @@ package errhell
 import (
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
-	"go/printer"
 	"go/token"
 	"os"
 
@@ -31,7 +31,7 @@ func Rewrite(filename string) {
 		},
 		nil)
 
-	printer.Fprint(os.Stdout, fset, f)
+	format.Node(os.Stdout, fset, f)
 }
 
 func handleFuncDecl(f *ast.FuncDecl) {
@@ -40,8 +40,10 @@ func handleFuncDecl(f *ast.FuncDecl) {
 	}
 
 	returnStack = append(returnStack, f.Type.Results)
+	errVarNameStack = append(errVarNameStack, 0)
 	defer func() {
 		returnStack = returnStack[:len(returnStack)-1]
+		errVarNameStack = errVarNameStack[:len(errVarNameStack)-1]
 	}()
 
 	handleFuncBody(f.Body)
@@ -53,8 +55,10 @@ func handleFuncLit(f *ast.FuncLit) {
 	}
 
 	returnStack = append(returnStack, f.Type.Results)
+	errVarNameStack = append(errVarNameStack, 0)
 	defer func() {
 		returnStack = returnStack[:len(returnStack)-1]
+		errVarNameStack = errVarNameStack[:len(errVarNameStack)-1]
 	}()
 
 	handleFuncBody(f.Body)
@@ -98,7 +102,8 @@ func finder(c *astutil.Cursor) bool {
 		for ; i > 1; i-- {
 			lhs = append(lhs, &ast.Ident{Name: "_"})
 		}
-		lhs = append(lhs, &ast.Ident{Name: errName})
+		errVarName := genErrVarName()
+		lhs = append(lhs, &ast.Ident{Name: errVarName})
 		rhs := []ast.Expr{v.X.(*ast.SelectorExpr).X}
 
 		assign := &ast.AssignStmt{}
@@ -107,7 +112,7 @@ func finder(c *astutil.Cursor) bool {
 		assign.Rhs = rhs
 		c.Replace(assign)
 
-		c.InsertAfter(genIfErr(errName))
+		c.InsertAfter(genIfErr(errVarName))
 		return true
 	case *ast.AssignStmt:
 		if len(v.Rhs) != 1 {
