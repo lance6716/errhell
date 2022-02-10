@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func main() {
 	_err_ := foo()
 	if _err_ != nil {
@@ -8,7 +10,7 @@ func main() {
 }
 
 func foo() error {
-	_err_ := b(0)
+	_, _err_ := a()
 	if _err_ != nil {
 		return _err_
 	}
@@ -28,6 +30,11 @@ func b(int) error {
 	return nil
 }
 
-var a = func() (int, error) {
+var a = func() (float32, error) {
+	_, _err_ := fmt.Printf("%p", b)
+	if _err_ != nil {
+		var v0 float32
+		return v0, _err_
+	}
 	return 0, nil
 }

@@ -1,11 +1,13 @@
 package main
 
+import "fmt"
+
 func main() {
     foo().try
 }
 
 func foo() error {
-    b(0).try
+    a().try2
     return nil
 }
 
@@ -18,6 +20,7 @@ func b(int) error {
     return nil
 }
 
-var a = func() (int, error) {
+var a = func() (float32, error) {
+    fmt.Printf("%p", b).try2
     return 0, nil
 }

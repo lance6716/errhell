@@ -64,15 +64,16 @@ func handleFuncBody(b *ast.BlockStmt) {
 	astutil.Apply(b, finder, nil)
 }
 
-func checkExprStmt(e *ast.ExprStmt) bool {
+// checkExprStmt will return integer N representing the Nth return value should
+// be used to build if-err.
+func checkExprStmt(e *ast.ExprStmt) int {
 	if s, ok := e.X.(*ast.SelectorExpr); ok {
-		// TODO support try2, try3 to specify the error position
-		if s.Sel.Name == marker {
+		if i := matchMarker(s.Sel.Name); i > 0 {
 			astutil.Apply(s.X, finder, nil)
-			return true
+			return i
 		}
 	}
-	return false
+	return 0
 }
 
 func finder(c *astutil.Cursor) bool {
@@ -81,13 +82,19 @@ func finder(c *astutil.Cursor) bool {
 	case *ast.FuncLit:
 		handleFuncLit(v)
 	case *ast.ExprStmt:
-		if checkExprStmt(v) {
-			rhs := v.X.(*ast.SelectorExpr).X
+		// TODO: support nested this ExprStmt in a if
+		if i := checkExprStmt(v); i > 0 {
+			lhs := []ast.Expr{}
+			for ; i > 1; i-- {
+				lhs = append(lhs, &ast.Ident{Name: "_"})
+			}
+			lhs = append(lhs, &ast.Ident{Name: errName})
+			rhs := []ast.Expr{v.X.(*ast.SelectorExpr).X}
 
 			assign := &ast.AssignStmt{}
 			assign.Tok = token.DEFINE
-			assign.Lhs = []ast.Expr{&ast.Ident{Name: errName}}
-			assign.Rhs = []ast.Expr{rhs}
+			assign.Lhs = lhs
+			assign.Rhs = rhs
 			c.Replace(assign)
 
 			ifErr := &ast.IfStmt{}
@@ -97,6 +104,7 @@ func finder(c *astutil.Cursor) bool {
 				Y:  &ast.Ident{Name: "nil"},
 			}
 			list := make([]ast.Stmt, 0, 2)
+			// TODO: for primitive type, use literal instead declare a variable
 			if varStmt := genVar(); varStmt != nil {
 				list = append(list, varStmt)
 			}
