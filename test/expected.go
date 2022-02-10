@@ -10,10 +10,11 @@ func main() {
 }
 
 func foo() error {
-	_, _err_ := a()
-	if _err_ != nil {
-		return _err_
+	i, myErr := a()
+	if myErr != nil {
+		return myErr
 	}
+	i++
 	return nil
 }
 
