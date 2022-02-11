@@ -41,3 +41,18 @@ func matchMarker(name string) int {
 	}
 	return i
 }
+
+// extractTypes flattens multiple names belongs to one type.
+func extractTypes(list []*ast.Field) []ast.Expr {
+	ret := []ast.Expr{}
+	for _, f := range list {
+		if len(f.Names) == 0 {
+			ret = append(ret, f.Type)
+			continue
+		}
+		for range f.Names {
+			ret = append(ret, f.Type)
+		}
+	}
+	return ret
+}

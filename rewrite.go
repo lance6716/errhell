@@ -163,14 +163,16 @@ func genVar() *ast.DeclStmt {
 	}
 
 	genDecl := &ast.GenDecl{Tok: token.VAR}
-	for i, field := range currReturn.List {
-		t := field.Type.(*ast.Ident)
-		if t.Name == "error" {
-			continue
+	for i, tp := range extractTypes(currReturn.List) {
+		if t, ok := tp.(*ast.Ident); ok {
+			if t.Name == "error" {
+				continue
+			}
 		}
+
 		valueSpec := &ast.ValueSpec{}
 		valueSpec.Names = []*ast.Ident{{Name: fmt.Sprintf("v%d", i)}}
-		valueSpec.Type = &ast.Ident{Name: t.Name}
+		valueSpec.Type = tp
 		genDecl.Specs = append(genDecl.Specs, valueSpec)
 	}
 	if len(genDecl.Specs) == 0 {
@@ -188,12 +190,14 @@ func genReturn(errVarName string) *ast.ReturnStmt {
 	if currReturn == nil {
 		return ret
 	}
-	for i, field := range currReturn.List {
-		t := field.Type.(*ast.Ident)
-		if t.Name == "error" {
-			ret.Results = append(ret.Results, &ast.Ident{Name: errVarName})
-			continue
+	for i, tp := range extractTypes(currReturn.List) {
+		if t, ok := tp.(*ast.Ident); ok {
+			if t.Name == "error" {
+				ret.Results = append(ret.Results, &ast.Ident{Name: errVarName})
+				continue
+			}
 		}
+
 		ret.Results = append(ret.Results, &ast.Ident{Name: fmt.Sprintf("v%d", i)})
 	}
 	return ret
