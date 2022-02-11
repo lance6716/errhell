@@ -3,6 +3,7 @@ package errhell
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"strconv"
 	"strings"
 )
@@ -55,4 +56,40 @@ func extractTypes(list []*ast.Field) []ast.Expr {
 		}
 	}
 	return ret
+}
+
+var zeroValueForBasicType = map[string]ast.Expr{
+	"bool":       &ast.Ident{Name: "false"},
+	"string":     &ast.BasicLit{Kind: token.STRING, Value: `""`},
+	"int":        &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"int8":       &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"int16":      &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"int32":      &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"int64":      &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"uint":       &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"uint8":      &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"uint16":     &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"uint32":     &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"uint64":     &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"uintptr":    &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"byte":       &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"rune":       &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"float32":    &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"float64":    &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"complex64":  &ast.BasicLit{Kind: token.INT, Value: "0"},
+	"complex128": &ast.BasicLit{Kind: token.INT, Value: "0"},
+}
+
+// zeroValueLiteralForType returns an expression of zero value of the given type
+// which could be written as valid source code. Return nil if not support this
+// type.
+func zeroValueLiteralForType(tp ast.Expr) ast.Expr {
+	switch v := tp.(type) {
+	case *ast.Ident:
+		return zeroValueForBasicType[v.Name]
+	case *ast.StarExpr, *ast.FuncType, *ast.ChanType, *ast.ArrayType,
+		*ast.MapType, *ast.InterfaceType:
+		return &ast.Ident{Name: "nil"}
+	}
+	return nil
 }

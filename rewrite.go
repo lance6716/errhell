@@ -169,9 +169,12 @@ func genVar() *ast.DeclStmt {
 				continue
 			}
 		}
+		if zeroValueLiteralForType(tp) != nil {
+			continue
+		}
 
 		valueSpec := &ast.ValueSpec{}
-		valueSpec.Names = []*ast.Ident{{Name: fmt.Sprintf("v%d", i)}}
+		valueSpec.Names = []*ast.Ident{{Name: fmt.Sprintf("_v%d", i)}}
 		valueSpec.Type = tp
 		genDecl.Specs = append(genDecl.Specs, valueSpec)
 	}
@@ -197,8 +200,12 @@ func genReturn(errVarName string) *ast.ReturnStmt {
 				continue
 			}
 		}
+		if expr := zeroValueLiteralForType(tp); expr != nil {
+			ret.Results = append(ret.Results, expr)
+			continue
+		}
 
-		ret.Results = append(ret.Results, &ast.Ident{Name: fmt.Sprintf("v%d", i)})
+		ret.Results = append(ret.Results, &ast.Ident{Name: fmt.Sprintf("_v%d", i)})
 	}
 	return ret
 }
