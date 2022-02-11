@@ -53,3 +53,15 @@ func namedReturn() (a, b int, err error) {
 	returnError().try
 	return 0, 0, err
 }
+
+func manyReturn() (complex64,
+	*int,
+	<-chan struct{},
+	[]float32,
+	interface{},
+	func(error) error,
+	map[string]interface{},
+	error) {
+	returnError().try
+	return 0, nil, nil, nil, nil, nil, nil, nil
+}

@@ -102,3 +102,28 @@ func namedReturn() (a, b int, err error) {
 
 	return 0, 0, err
 }
+
+func manyReturn() (complex64,
+	*int,
+	<-chan struct{},
+	[]float32,
+	interface{},
+	func(error) error,
+	map[string]interface{},
+	error) {
+	_err0 := returnError()
+	if _err0 != nil {
+		var (
+			v0 complex64
+			v1 *int
+			v2 <-chan struct{}
+			v3 []float32
+			v4 interface{}
+			v5 func(error) error
+			v6 map[string]interface{}
+		)
+		return v0, v1, v2, v3, v4, v5, v6, _err0
+	}
+
+	return 0, nil, nil, nil, nil, nil, nil, nil
+}
